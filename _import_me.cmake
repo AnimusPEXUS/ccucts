@@ -1,16 +1,4 @@
 
-# ccutils cmake toolset (CCUCTS for short, yes B) )
-#
-#  this toolset (which you couldd use in your projects too),
-#  is for my ccutils and other my c/c++ projects, using cmake to build projects.
-#
-#  I decided to make CCUCTS becouse I didn't wanted to write same cmake scripts individually
-#  to all my projects, so I decided to make one separate project with all my common
-#  cmake scripts and import them everywhere I need.
-#
-#  currently CCUCTS is just a subdir of ccutils. 
-#  when it's become more stable, I will separate it to it's own repository
-
 if(DEFINED CCUCTS_VERSION)
   return()
 endif()
