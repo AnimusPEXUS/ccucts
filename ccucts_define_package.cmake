@@ -40,6 +40,7 @@ endif()
 #  ---
 #  DOMAIN_NAME    - domain name. to decrease name collision
 #                   possibility.
+#  DOMAIN_DIRNAME - domain name with unsafe chars replaced with underscores.
 #  PROJECT_NAME   - adds additional protection against name collision,
 #                   analogicaly to DOMAIN_NAME.
 #  PACKAGE_NAME   - name for package to define.
@@ -47,10 +48,10 @@ endif()
 #                   CMakeList.txt
 #  CPU            - force cpu value (by default calculated automatically)
 #  OS             - force os value (by default calculated automatically)
-#  ADD_COMPILE_FLAGS - additional compile flags 
-#                      (for example if you want to pass -DSOMETHING=something on 
+#  ADD_COMPILE_FLAGS - additional compile flags
+#                      (for example if you want to pass -DSOMETHING=something on
 #                       c/cpp files compilation)
-#  ADD_LINK_FLAGS    - additional linker flags 
+#  ADD_LINK_FLAGS    - additional linker flags
 #                      same as ADD_COMPILE_FLAGS, but for linker
 #  ITEMS          - list items to package. described abowe.
 #  LIBS_PUB       - passed to target_link_libraries() cmake function. todo: explanation
@@ -98,7 +99,7 @@ function(ccucts_define_package)
 
   list(SORT ccucts_define_package_arg_ITEMS)
 
-  block()
+  block(PROPAGATE ccucts_define_package_arg_CPU ccucts_define_package_arg_OS)
 
     # note: this doesn't work, so i forced to write code for each parameter
     # foreach(i DOMAIN_NAME PROJECT_NAME PACKAGE_NAME SUBDIR CPU OS )
@@ -133,17 +134,26 @@ function(ccucts_define_package)
     string(LENGTH "${ccucts_define_package_arg_CPU}" t_len)
     if(t_len EQUAL 0)
       # message(FATAL_ERROR "CPU must be defined")
-      set(ccucts_define_package_arg_CPU ${CCUCTS_CALCULATED_HOST_CPU})
+      set(ccucts_define_package_arg_CPU "${CCUCTS_CALCULATED_HOST_CPU}")
+    endif()
+
+    string(LENGTH "${ccucts_define_package_arg_CPU}" t_len)
+    if(t_len EQUAL 0)
+      message(FATAL_ERROR "CPU must be defined")
     endif()
 
     string(LENGTH "${ccucts_define_package_arg_OS}" t_len)
     if(t_len EQUAL 0)
       # message(FATAL_ERROR "OS must be defined")
-      set(ccucts_define_package_arg_OS ${CCUCTS_CALCULATED_HOST_OS})
+      set(ccucts_define_package_arg_OS "${CCUCTS_CALCULATED_HOST_OS}")
+    endif()
+
+    string(LENGTH "${ccucts_define_package_arg_OS}" t_len)
+    if(t_len EQUAL 0)
+      message(FATAL_ERROR "OS must be defined")
     endif()
 
   endblock()
-  # return()
 
   set(msg "  defining ${ccucts_define_package_arg_PROJECT_NAME} package ")
   string(APPEND msg "${ccucts_define_package_arg_PACKAGE_NAME}")
@@ -160,6 +170,7 @@ function(ccucts_define_package)
   foreach(item ${ccucts_define_package_arg_ITEMS})
 
     set(files_found 0)
+    set(found_item_headers)
 
     set(filename_base_to_check
       "${item}"
@@ -177,11 +188,7 @@ function(ccucts_define_package)
         string(APPEND filename_base_c "${base}")
         string(APPEND filename_base_c "${ext}")
 
-        # message(NOTICE "filename_base_c: ${filename_base_c}")
-
         set(fntc "${CMAKE_CURRENT_SOURCE_DIR}/${ccucts_define_package_arg_SUBDIR}/${filename_base_c}")
-
-        # message(NOTICE "fntc: ${fntc}")
 
         if (EXISTS "${fntc}")
 
@@ -190,7 +197,6 @@ function(ccucts_define_package)
           string(REGEX MATCH "^.*\.cpp$" res "${filename_base_c}")
 	  string(LENGTH "${res}" res_len)
 
-          # message(NOTICE "res_len GREATER 0: res: ${res}")
           if(res_len GREATER 0)
             list(APPEND found_sources "${fntc}")
             math(EXPR files_found "${files_found} + 1")
@@ -204,6 +210,7 @@ function(ccucts_define_package)
           if(res_len GREATER 0)
             list(APPEND found_headers "${fntc}")
             math(EXPR files_found "${files_found} + 1")
+            list(APPEND found_item_headers "${filename_base_c}")
           endif()
 
         endif()
@@ -214,6 +221,27 @@ function(ccucts_define_package)
     if (${files_found} EQUAL 0)
       message(WARNING "no files found for item '${item}'")
     endif()
+
+    list(LENGTH "${found_item_headers}" found_item_headers_length)
+    set(local_subheaders_text)
+
+    foreach(ih ${found_item_headers})
+
+      string(APPEND
+	local_subheaders_text
+	"#include \"${ccucts_define_package_arg_DOMAIN_DIR_NAME}/${ccucts_define_package_arg_SUBDIR}/${ih}\" \n"
+      )
+    endforeach()
+
+    set(fntc "${CMAKE_CURRENT_SOURCE_DIR}/${ccucts_define_package_arg_SUBDIR}/${item}.local_headers.hpp")
+
+    file(
+      WRITE
+      "${fntc}"
+      "${local_subheaders_text}"
+    )
+
+    list(APPEND found_headers "${fntc}")
 
   endforeach()
 
@@ -293,15 +321,15 @@ function(ccucts_define_package)
     ${ccucts_define_package_arg_INC_DIRS_PRIV}
   )
 
-  target_compile_options( 
-    ${ccucts_define_package_arg_PACKAGE_NAME} 
+  target_compile_options(
+    ${ccucts_define_package_arg_PACKAGE_NAME}
     PUBLIC
     ${ADD_COMPILE_FLAGS}
   )
 
   target_link_options(
-    ${ccucts_define_package_arg_PACKAGE_NAME}  
-    PUBLIC 
+    ${ccucts_define_package_arg_PACKAGE_NAME}
+    PUBLIC
     ${ADD_LINK_FLAGS}
   )
 
