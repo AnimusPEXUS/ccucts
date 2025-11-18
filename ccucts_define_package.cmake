@@ -74,6 +74,7 @@ function(ccucts_define_package)
   set(
     oneValueArgs
     DOMAIN_NAME
+    DOMAIN_DIRNAME
     PROJECT_NAME
     PACKAGE_NAME
     SUBDIR
@@ -97,10 +98,13 @@ function(ccucts_define_package)
     ${ARGN}
   )
 
+  set(local_headers_file_name_suffix_const "_local_headers")
+
   list(SORT ccucts_define_package_arg_ITEMS)
 
   block(PROPAGATE ccucts_define_package_arg_CPU ccucts_define_package_arg_OS)
 
+    # todo: try fix/make better this somehow
     # note: this doesn't work, so i forced to write code for each parameter
     # foreach(i DOMAIN_NAME PROJECT_NAME PACKAGE_NAME SUBDIR CPU OS )
     #   set(t_len 0)
@@ -119,6 +123,11 @@ function(ccucts_define_package)
     string(LENGTH "${ccucts_define_package_arg_DOMAIN_NAME}" t_len)
     if(t_len EQUAL 0)
       message(FATAL_ERROR "DOMAIN_NAME must be defined")
+    endif()
+
+    string(LENGTH "${ccucts_define_package_arg_DOMAIN_DIRNAME}" t_len)
+    if(t_len EQUAL 0)
+      message(FATAL_ERROR "DOMAIN_DIRNAME must be defined")
     endif()
 
     string(LENGTH "${ccucts_define_package_arg_PROJECT_NAME}" t_len)
@@ -180,6 +189,8 @@ function(ccucts_define_package)
       "${item}.${ccucts_define_package_arg_CPU}.${ccucts_define_package_arg_OS}"
     )
 
+    set(found_item_local_headers FALSE)
+
     foreach(base ${filename_base_to_check})
 
       foreach(ext ".cpp" ".hpp")
@@ -189,8 +200,10 @@ function(ccucts_define_package)
         string(APPEND filename_base_c "${ext}")
 
         set(fntc "${CMAKE_CURRENT_SOURCE_DIR}/${ccucts_define_package_arg_SUBDIR}/${filename_base_c}")
+        # message(STATUS "checking file ${fntc}")
 
         if (EXISTS "${fntc}")
+          # message(STATUS "  file ok ${fntc}")
 
           set(res "")
           set(res_len 0)
@@ -208,9 +221,15 @@ function(ccucts_define_package)
 	  string(LENGTH "${res}" res_len)
 
           if(res_len GREATER 0)
+            # message(STATUS "  file header ok ${fntc}")
             list(APPEND found_headers "${fntc}")
             math(EXPR files_found "${files_found} + 1")
             list(APPEND found_item_headers "${filename_base_c}")
+
+            if ( NOT ("${item}.hpp" STREQUAL "${filename_base_c}") )
+              set(found_item_local_headers TRUE)
+            endif()
+
           endif()
 
         endif()
@@ -222,32 +241,54 @@ function(ccucts_define_package)
       message(WARNING "no files found for item '${item}'")
     endif()
 
-    list(LENGTH "${found_item_headers}" found_item_headers_length)
-    set(local_subheaders_text)
+    set(found_item_headers_length 0)
+    list(LENGTH found_item_headers found_item_headers_length)
 
-    foreach(ih ${found_item_headers})
-
-      string(APPEND
-	local_subheaders_text
-	"#include \"${ccucts_define_package_arg_DOMAIN_DIR_NAME}/${ccucts_define_package_arg_SUBDIR}/${ih}\" \n"
-      )
-    endforeach()
-
-    set(fntc "${CMAKE_CURRENT_SOURCE_DIR}/${ccucts_define_package_arg_SUBDIR}/${item}.local_headers.hpp")
-
-    file(
-      WRITE
-      "${fntc}"
-      "${local_subheaders_text}"
+    set(
+      local_headers_target_file
+      "${CMAKE_CURRENT_SOURCE_DIR}/${ccucts_define_package_arg_SUBDIR}/${item}.${local_headers_file_name_suffix_const}.hpp"
     )
 
-    list(APPEND found_headers "${fntc}")
+    set(local_subheaders_text "")
+
+    if((found_item_headers_length GREATER 0) AND found_item_local_headers)
+
+      # message(STATUS "writing local_headers")
+
+      foreach(ih ${found_item_headers})
+
+	string(APPEND
+	  local_subheaders_text
+	  "#include \"${ccucts_define_package_arg_DOMAIN_DIR_NAME}/${ccucts_define_package_arg_SUBDIR}/${ih}\" \n"
+	)
+      endforeach()
+
+      message(STATUS "    generating \"${local_headers_target_file}\"")
+
+      file(
+	WRITE
+	"${local_headers_target_file}"
+	"${local_subheaders_text}"
+      )
+
+      list(APPEND found_headers "${local_headers_target_file}")
+
+    else()
+
+      # message(STATUS "removing local_headers")
+
+      if (EXISTS "${local_headers_target_file}")
+        message(STATUS "    removing \"${local_headers_target_file}\"")
+        file(REMOVE "${local_headers_target_file}")
+      endif()
+
+    endif()
 
   endforeach()
 
   # print file names
 
-  if (0)
+  if (FALSE)
     message("    sources:")
     foreach(i ${found_sources})
       message(NOTICE "      " "${i}")
