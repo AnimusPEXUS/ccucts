@@ -40,8 +40,7 @@ endif()
 #
 # parameters:
 #  ---
-#  DOMAIN_NAME    - domain name. to decrease name collision
-#                   possibility.
+#  DOMAIN_NAME    - domain name. to decrease name collision possibility.
 #  DOMAIN_DIRNAME - domain name with unsafe chars replaced with underscores.
 #  PROJECT_NAME   - adds additional protection against name collision,
 #                   analogicaly to DOMAIN_NAME.
@@ -62,7 +61,7 @@ endif()
 #  INC_DIRS_PRIV  - passed to target_include_directories() cmake function. todo: explanation
 #  ---
 #
-#  DOMAIN_NAME, PROJECT_NAME - ass you guessed, this way you can define packages
+#  DOMAIN_NAME, PROJECT_NAME - as you guessed, this way you can define packages
 #     for different domains and projects in same cpp code repository and/or same CMakeLists.txt.
 #     but you, brobably, to keep orger, should lean to minimize possibility placing
 #     different domains and projects in same cpp code repository and/or same CMakeLists.txt.
