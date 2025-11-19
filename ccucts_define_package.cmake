@@ -2,6 +2,8 @@
 # todo: this function requires cleanups.
 # todo: too many literal and repeated string formattings.
 # todo: also: 80 chars per line! - will address this when I'll be able to do it with ccedit
+# todo: this function works only with *.cpp *.hpp files.. need to decide if other extensions 
+#       supported
 
 if (NOT DEFINED CCUCTS_DEFINITION_PROCESS)
   message(FATAL_ERROR "include _import_me.cmake")
