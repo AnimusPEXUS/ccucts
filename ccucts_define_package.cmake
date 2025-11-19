@@ -261,7 +261,7 @@ function(ccucts_define_package)
 
 	string(APPEND
 	  local_subheaders_text
-	  "#include \"${ccucts_define_package_arg_DOMAIN_DIRNAME}/${ccucts_define_package_arg_SUBDIR}/${ih}\" \n"
+	  "#include <${ccucts_define_package_arg_DOMAIN_DIRNAME}/${ccucts_define_package_arg_PROJECT_NAME}/${ccucts_define_package_arg_SUBDIR}/${ih}> \n"
 	)
       endforeach()
 
