@@ -2,7 +2,7 @@
 # todo: this function requires cleanups.
 # todo: too many literal and repeated string formattings.
 # todo: also: 80 chars per line! - will address this when I'll be able to do it with ccedit
-# todo: this function works only with *.cpp *.hpp files.. need to decide if other extensions 
+# todo: this function works only with *.cpp *.hpp files.. need to decide if other extensions
 #       supported
 
 if (NOT DEFINED CCUCTS_DEFINITION_PROCESS)
@@ -261,7 +261,7 @@ function(ccucts_define_package)
 
 	string(APPEND
 	  local_subheaders_text
-	  "#include \"${ccucts_define_package_arg_DOMAIN_DIR_NAME}/${ccucts_define_package_arg_SUBDIR}/${ih}\" \n"
+	  "#include \"${ccucts_define_package_arg_DOMAIN_DIRNAME}/${ccucts_define_package_arg_SUBDIR}/${ih}\" \n"
 	)
       endforeach()
 
