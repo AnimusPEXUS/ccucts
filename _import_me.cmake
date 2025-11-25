@@ -3,9 +3,9 @@ if(DEFINED CCUCTS_VERSION)
   return()
 endif()
 
-set(CCUCTS_VERSION 0.2.2)
+set(CCUCTS_VERSION 0.3)
 
-# all other scripts in this dir should message(FATAL_ERROR) 
+# all other scripts in this dir should message(FATAL_ERROR)
 # if CCUCTS_DEFINITION_PROCESS is undefined
 
 set(CCUCTS_DEFINITION_PROCESS TRUE)
@@ -19,13 +19,18 @@ include("${CCUCTS_ROOT_DIR}/ccucts_define_package.cmake")
 
 # do CCUCTS internal initialization
 
-ccucts_detect_cpu_os(CCUCTS_CALCULATED_HOST_CPU CCUCTS_CALCULATED_HOST_OS)
+ccucts_detect_cpu_os(
+  CCUCTS_CALCULATED_HOST_CPU
+  CCUCTS_CALCULATED_HOST_OS
+  CCUCTS_CALCULATED_HOST_POSIX
+)
 
 message(STATUS "using CCUCTS (ver ${CCUCTS_VERSION})")
 message(STATUS "  CCUCTS configuring results:")
-message(STATUS "     detected host CPU: ${CCUCTS_CALCULATED_HOST_CPU}")
-message(STATUS "     detected host OS : ${CCUCTS_CALCULATED_HOST_OS}")
-message(STATUS "     CCUCTS root dir  : ${CCUCTS_ROOT_DIR}")
+message(STATUS "     detected host CPU   : ${CCUCTS_CALCULATED_HOST_CPU}")
+message(STATUS "     detected host OS    : ${CCUCTS_CALCULATED_HOST_OS}")
+message(STATUS "     detected host POSIX : ${CCUCTS_CALCULATED_HOST_POSIX}")
+message(STATUS "     CCUCTS root dir     : ${CCUCTS_ROOT_DIR}")
 
 block()
   set(t_l 0)
