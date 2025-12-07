@@ -3,7 +3,7 @@ if(DEFINED CCUCTS_VERSION)
   return()
 endif()
 
-set(CCUCTS_VERSION 0.3)
+set(CCUCTS_VERSION 0.4)
 
 # all other scripts in this dir should message(FATAL_ERROR)
 # if CCUCTS_DEFINITION_PROCESS is undefined

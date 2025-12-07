@@ -181,6 +181,7 @@ function(ccucts_define_package)
 
     set(files_found 0)
     set(found_item_headers)
+    set(found_item_local_headers)
 
     set(filename_base_to_check
       "${item}"
@@ -190,7 +191,7 @@ function(ccucts_define_package)
       "${item}.${ccucts_define_package_arg_CPU}.${ccucts_define_package_arg_OS}"
     )
 
-    set(found_item_local_headers FALSE)
+    # set(found_item_local_headers FALSE)
 
     foreach(base ${filename_base_to_check})
 
@@ -228,7 +229,7 @@ function(ccucts_define_package)
             list(APPEND found_item_headers "${filename_base_c}")
 
             if ( NOT ("${item}.hpp" STREQUAL "${filename_base_c}") )
-              set(found_item_local_headers TRUE)
+              list(APPEND found_item_local_headers "${filename_base_c}")
             endif()
 
           endif()
@@ -245,6 +246,10 @@ function(ccucts_define_package)
     set(found_item_headers_length 0)
     list(LENGTH found_item_headers found_item_headers_length)
 
+    set(found_item_local_headers_length 0)
+    list(LENGTH found_item_local_headers found_item_local_headers_length)
+
+
     set(
       local_headers_target_file
       "${CMAKE_CURRENT_SOURCE_DIR}/${ccucts_define_package_arg_SUBDIR}/${item}.${local_headers_file_name_suffix_const}.hpp"
@@ -252,11 +257,11 @@ function(ccucts_define_package)
 
     set(local_subheaders_text "")
 
-    if((found_item_headers_length GREATER 0) AND found_item_local_headers)
+    if((found_item_headers_length GREATER 0) AND (found_item_local_headers_length GREATER 0))
 
       # message(STATUS "writing local_headers")
 
-      foreach(ih ${found_item_headers})
+      foreach(ih ${found_item_local_headers})
 
 	string(APPEND
 	  local_subheaders_text
